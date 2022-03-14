@@ -15,13 +15,17 @@ class KnightPathFinder
         move_candidates
     end
 
-    def self.root_node(startpos)
-        PolyTreeNode.new(startpos)
+    def initialize(startpos)
+        @root_node = PolyTreeNode.new(startpos)
+        @considered_positions = [startpos]
+        self.build_move_tree
     end
 
-    def initialize(startpos)
-        @root = KnightPathFinder.root_node
-        self.build_move_tree
+    def new_move_positions(pos)
+        valid_candidates = KnightPathFinder.valid_moves(pos)
+        new_moves = valid_candidates.reject { |candidate| @considered_positions.include?(candidate) }
+        new_moves.each { |move| @considered_positions << move }
+        new_moves
     end
 
     def build_move_tree
