@@ -27,16 +27,21 @@ class KnightPathFinder
     attr_reader :root_node
 
     def new_move_positions(pos)
-        valid_candidates = KnightPathFinder.valid_moves(pos)
-        new_moves = valid_candidates.reject { |candidate| @considered_positions.include?(candidate) }
-        new_moves.each { |move| @considered_positions << move }
-        new_moves
+        KnightPathFinder.valid_moves(pos)
+            .reject { |candidate| @considered_positions.include?(candidate) }
+            .each { |move| @considered_positions << move }
     end
 
     def build_move_tree
-        queue = [@root_node.value]
+        queue = [@root_node]
         until queue.empty?
-
+            focus = queue.shift
+            new_moves = new_move_positions(focus.value)
+            new_moves.each do |move|
+                child_node = PolyTreeNode.new(move)
+                focus.add_child(child_node)
+                queue << child_node
+            end
         end
     end
 
@@ -44,28 +49,3 @@ class KnightPathFinder
 
     end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def bfs(target_value)
-        queue = [self]
-        until queue.empty?
-            focus = queue.shift
-            return focus if focus.value == target_value
-            focus.children.each { |child| queue << child }
-        end
-        nil
-    end
