@@ -1,13 +1,14 @@
 require_relative "0_polytree_node"
 
 class KnightPathFinder
-    def self.valid_moves(pos)
+    def self.valid_moves(pos, board_size = 8)
+        # Assuming an 8x8 board
         row, col = pos
         move_candidates = []
         (0..row + 2).each do |x|
-            next unless x <= 7
+            next unless x < board_size
             (0..col + 2).each do |y|
-                next unless y <= 7
+                next unless y < board_size
                 deltax = (x - row).abs
                 deltay = (y - col).abs
                 valid = (deltax == 2 && deltay == 1) || (deltax == 1 && deltay == 2)
@@ -33,7 +34,6 @@ class KnightPathFinder
     end
 
     def build_move_tree
-        # Assuming an 8x8 board
         queue = [@root_node.value]
         until queue.empty?
 
