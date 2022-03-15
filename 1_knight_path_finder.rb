@@ -24,15 +24,17 @@ class KnightPathFinder
         self.build_move_tree
     end
 
-    attr_reader :root_node
-
-    def new_move_positions(pos)
-        KnightPathFinder.valid_moves(pos)
-            .reject { |candidate| @considered_positions.include?(candidate) }
-            .each { |move| @considered_positions << move }
+    def find_path(endpos)
+        finish = @root_node.bfs(endpos)
+        self.trace_path_back(finish)
     end
 
+    private
+
+    attr_reader :root_node
+
     def build_move_tree
+        # Build the tree breadth first to get the shortest path
         queue = [@root_node]
         until queue.empty?
             focus = queue.shift
@@ -45,7 +47,20 @@ class KnightPathFinder
         end
     end
 
-    def find_path
+    def new_move_positions(pos)
+        KnightPathFinder.valid_moves(pos)
+            .reject { |candidate| @considered_positions.include?(candidate) }
+            .each { |move| @considered_positions << move }
+    end
 
+
+    def trace_path_back(destination_node)
+        path = []
+        node = destination_node
+        until node.nil?
+            path.unshift(node.value)
+            node = node.parent
+        end
+        path
     end
 end
