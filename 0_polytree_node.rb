@@ -1,16 +1,53 @@
+module Searchable
+    def dfs(target = nil, &prc)
+        raise "Need a proc or target" if [target, prc].none?
+        prc ||= Proc.new { |node| node.value == target }
+
+        return self if prc.call(self)
+
+        self.children.each do |child|
+            result = child.dfs(&prc)
+            return result unless result.nil?
+        end
+        nil
+    end
+
+    def bfs(target = nil, &prc)
+        raise "Need a proc or target" if [target, prc].none?
+        prc ||= Proc.new { |node| node.value == target }
+        queue = [self]
+        until queue.empty?
+            focus = queue.shift
+            return focus if prc.call(focus)
+            queue.concat(focus.children)
+        end
+        nil
+    end
+
+    def count
+        1 + children.map(&:count).inject(:+)
+    end
+end
+
 class PolyTreeNode
+    include Searchable
     def initialize(value)
         @parent = nil
         @value = value
         @children = []
     end
 
-    attr_reader :parent, :children, :value
+    attr_accessor :value
+    attr_reader :parent
+
+    def children
+        @children.dup
+    end
 
     def parent=(parent_node)
-        @parent.children.delete(self) unless @parent.nil?
+        @parent.children_.delete(self) unless @parent.nil?
         @parent = parent_node
-        @parent.children << self unless parent_node.nil?
+        @parent.children_ << self unless parent_node.nil?
         self.parent
     end
 
@@ -19,26 +56,13 @@ class PolyTreeNode
     end
 
     def remove_child(child_node)
-        raise "Node is not a child" if child_node.parent.nil?
+        raise "Node is not a child" if child_node.parent != self
         child_node.parent = nil
     end
 
-    def dfs(target_value)
-        return self if self.value == target_value
-        self.children.each do |child|
-            result = child.dfs(target_value)
-            return result unless result.nil?
-        end
-        nil
-    end
-
-    def bfs(target_value)
-        queue = [self]
-        until queue.empty?
-            focus = queue.shift
-            return focus if focus.value == target_value
-            focus.children.each { |child| queue << child }
-        end
-        nil
+    protected
+    
+    def children_
+        @children
     end
 end
